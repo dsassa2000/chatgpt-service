@@ -4,6 +4,7 @@ import com.app.config.ChatGptConfig;
 import com.app.model.request.BotRequest;
 import com.app.model.request.ChatGptRequest;
 import com.app.model.response.ChatGptResponse;
+import com.opencsv.CSVWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class BotServiceImpl implements BotService {
     }
 
     public ChatGptResponse askQuestion(BotRequest botRequest) {
-        return this.getResponse(
+    	ChatGptResponse response =  this.getResponse(
                 this.buildHttpEntity(
                         new ChatGptRequest(
                                 ChatGptConfig.MODEL,
@@ -47,6 +48,11 @@ public class BotServiceImpl implements BotService {
                                 ChatGptConfig.TEMPERATURE,
                                 ChatGptConfig.MAX_TOKEN,
                                 ChatGptConfig.TOP_P)));
+    	String answer = response.getChoices().get(0).getText();
+    	String question = botRequest.getQuestion();
+    	String [] rowData = {question,answer};
+    	appendToCsv("C:\\Users\\HP\\Desktop\\Classeur1.csv",rowData);
+    	return response;
     }
     // return just answer
     public String ask(BotRequest botRequest) {
@@ -62,12 +68,12 @@ public class BotServiceImpl implements BotService {
     	String answer = resp.getChoices().get(0).getText();
     	String question = botRequest.getQuestion();
     	String [] rowData = {question,answer};
-    	//appendToCsv("C:\\Users\\HP\\Desktop\\Classeur1.csv",rowData);
+    	appendToCsv("C:\\Users\\HP\\Desktop\\Classeur1.csv",rowData);
     	
     	return answer;
     }
     // write response to csv file
-    /*public void appendToCsv(String filename, String[] rowData) {
+    public void appendToCsv(String filename, String[] rowData) {
         try {
             FileWriter fileWriter = new FileWriter(filename, true);
             CSVWriter csvWriter = new CSVWriter(fileWriter);
@@ -80,7 +86,7 @@ public class BotServiceImpl implements BotService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 }
 
 
