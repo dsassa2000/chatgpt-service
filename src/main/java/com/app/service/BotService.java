@@ -6,5 +6,5 @@ import com.app.model.response.ChatGptResponse;
 public interface BotService {
 
     ChatGptResponse askQuestion(BotRequest botRequest);
-    String ask(BotRequest botRequest);
+    ChatGptResponse ask(String botRequest);
 }

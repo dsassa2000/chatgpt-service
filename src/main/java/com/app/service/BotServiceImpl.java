@@ -1,11 +1,8 @@
 package com.app.service;
 
-import com.app.config.ChatGptConfig;
-import com.app.model.request.BotRequest;
-import com.app.model.request.ChatGptRequest;
-import com.app.model.response.ChatGptResponse;
-import com.opencsv.CSVWriter;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -15,6 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import com.app.config.ChatGptConfig;
+import com.app.model.request.BotRequest;
+import com.app.model.request.ChatGptRequest;
+import com.app.model.response.ChatGptResponse;
 
 @Service
 public class BotServiceImpl implements BotService {
@@ -48,44 +50,40 @@ public class BotServiceImpl implements BotService {
                                 ChatGptConfig.TEMPERATURE,
                                 ChatGptConfig.MAX_TOKEN,
                                 ChatGptConfig.TOP_P)));
-    	String answer = response.getChoices().get(0).getText();
-    	String question = botRequest.getQuestion();
-    	String [] rowData = {question,answer};
-    	appendToCsv("C:\\Users\\HP\\Desktop\\Classeur1.csv",rowData);
     	return response;
     }
     // return just answer
-    public String ask(BotRequest botRequest) {
+    public ChatGptResponse ask(String botRequest) {
     	ChatGptResponse resp = this.getResponse(
                 this.buildHttpEntity(
                         new ChatGptRequest(
                                 ChatGptConfig.MODEL,
-                                botRequest.getQuestion(),
+                                botRequest,
                                 ChatGptConfig.TEMPERATURE,
                                 ChatGptConfig.MAX_TOKEN,
                                 ChatGptConfig.TOP_P)));
     	
     	String answer = resp.getChoices().get(0).getText();
-    	String question = botRequest.getQuestion();
-    	String [] rowData = {question,answer};
-    	appendToCsv("C:\\Users\\HP\\Desktop\\Classeur1.csv",rowData);
-    	
-    	return answer;
+    	try {
+			appendDataToCsvFile(botRequest, answer, "C:\\Users\\HP\\Desktop\\Classeur1.csv");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return resp;
     }
-    // write response to csv file
-    public void appendToCsv(String filename, String[] rowData) {
-        try {
-            FileWriter fileWriter = new FileWriter(filename, true);
-            CSVWriter csvWriter = new CSVWriter(fileWriter);
-            String[] header = {"Question", "Answer"};
-            csvWriter.writeNext(header);
-            fileWriter.append(String.join(";", rowData));
-            fileWriter.append("\n");
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void appendDataToCsvFile(String question,String answer, String filepath) throws IOException{
+        File file = new File(filepath);
+        boolean fileExists = file.exists();
+        FileWriter fileWriter = new FileWriter(file, true);
+        String header = "Question;Answer";
+        if(fileExists) {
+        	fileWriter.append(header);
+        	fileWriter.append("\n");
         }
+        fileWriter.append(question+";"+answer);    
+        fileWriter.flush();
+        fileWriter.close();
     }
 }
 
