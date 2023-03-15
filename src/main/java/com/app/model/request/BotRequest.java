@@ -3,7 +3,7 @@ package com.app.model.request;
 import java.io.Serializable;
 
 
-public class BotRequest  {
+public class BotRequest implements Serializable {
     private String question;
 
 	public String getQuestion() {
