@@ -8,6 +8,7 @@ public class ChatGPTServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ChatGPTServiceApplication.class, args);
+		System.setProperty("java.awt.headless", "false");
     }
 
 }
